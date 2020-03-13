@@ -17,7 +17,7 @@
 
 # build go proxy from source
 FROM golang:1.15 AS builder_source
-ARG GO_PROXY_GITHUB_USER=apache
+ARG GO_PROXY_GITHUB_USER=nimbella-corp
 ARG GO_PROXY_GITHUB_BRANCH=master
 RUN git clone --branch ${GO_PROXY_GITHUB_BRANCH} \
    https://github.com/${GO_PROXY_GITHUB_USER}/openwhisk-runtime-go /src ;\
@@ -35,7 +35,7 @@ RUN curl -sL \
 
 FROM python:2.7-alpine
 # select the builder to use
-ARG GO_PROXY_BUILD_FROM=release
+ARG GO_PROXY_BUILD_FROM=source
 
 # Upgrade and install basic Python dependencies
 RUN apk add --no-cache \
