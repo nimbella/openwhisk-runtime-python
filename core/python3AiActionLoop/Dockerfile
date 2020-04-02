@@ -53,7 +53,12 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
             && rm -rf /var/lib/apt/lists/*
 
 # PyTorch
-RUN pip3 install torch torchvision
+#RUN pip3 install torch torchvision
+# persistent as it fails often
+RUN while ! pip list | grep torch ;\
+    do pip install torch ; done ;\
+    while ! pip list | grep torchvision ;\
+    do pip install torchvision ; done
 
 # rclone
 RUN curl -L https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rclone.deb \
