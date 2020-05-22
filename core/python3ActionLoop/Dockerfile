@@ -36,6 +36,9 @@ RUN curl -sL \
 FROM python:3.7-buster
 ARG GO_PROXY_BUILD_FROM=source
 
+# Copy nimbella version of the sfx library
+COPY signalfx-lambda-python /opt/signalfx_lambda
+
 # Install common modules for python
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
