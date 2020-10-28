@@ -67,6 +67,9 @@ RUN pip install --no-cache-dir --upgrade pip setuptools six \
         twisted==18.7.0 \
         signalfx_lambda==0.2.1
 
+# install nim
+RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
+
 RUN mkdir -p /action
 WORKDIR /
 COPY --from=builder_source /bin/proxy /bin/proxy_source
