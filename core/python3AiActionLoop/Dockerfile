@@ -73,6 +73,9 @@ RUN pip3 install --upgrade pip six &&\
     pip3 install --no-cache-dir -r requirements.txt &&\
     ln -sf /usr/bin/python3 /usr/local/bin/python
 
+# install nim
+RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
+
 RUN mkdir -p /action
 WORKDIR /
 
@@ -87,8 +90,6 @@ ADD lib/launcher.py /lib/launcher.py
 ENV OW_LOG_INIT_ERROR=1
 # the launcher must wait for an ack
 ENV OW_WAIT_FOR_ACK=1
-# using the runtime name to identify the execution environment
-ENV OW_EXECUTION_ENV=openwhisk/action-python-v3.6-ai
 # compiler script
 ENV OW_COMPILER=/bin/compile
 # use utf-8

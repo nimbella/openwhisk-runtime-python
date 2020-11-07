@@ -67,6 +67,9 @@ RUN pip install --no-cache-dir --upgrade pip setuptools six \
         twisted==18.7.0 \
         signalfx_lambda==0.2.1
 
+# install nim
+RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
+
 RUN mkdir -p /action
 WORKDIR /
 COPY --from=builder_source /bin/proxy /bin/proxy_source
@@ -81,6 +84,4 @@ ENV OW_COMPILER=/bin/compile
 ENV OW_LOG_INIT_ERROR=1
 # the launcher must wait for an ack
 ENV OW_WAIT_FOR_ACK=1
-# using the runtime name to identify the execution environment
-ENV OW_EXECUTION_ENV=openwhisk/action-python-v2.7
 ENTRYPOINT ["/bin/proxy"]
