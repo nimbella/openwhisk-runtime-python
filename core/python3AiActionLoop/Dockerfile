@@ -73,6 +73,9 @@ RUN pip3 install --upgrade pip six &&\
     pip3 install --no-cache-dir -r requirements.txt &&\
     ln -sf /usr/bin/python3 /usr/local/bin/python
 
+# install nim
+RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
+
 RUN mkdir -p /action
 WORKDIR /
 
