@@ -11,6 +11,9 @@ virtualenv == 16.7.9
 twisted == 19.10.0
 netifaces == 0.10.9
 
+# Nimbella package
+nimbella == 1.0.0
+
 # package to sync from a variety of cloud blob storage
 python-rclone == 0.0.2
 
@@ -30,6 +33,7 @@ numpy == 1.18.1
 scikit-learn == 0.22.1
 scipy == 1.4.1
 pandas == 1.0.1
+spacy == 2.2.4
 
 # packages for image processing
 Pillow == 7.0.0
@@ -37,6 +41,7 @@ Pillow == 7.0.0
 # Etc
 pymongo == 3.10.1
 redis == 3.4.1
+google-cloud-storage == 1.28.1
 pika == 1.1.0
 elasticsearch == 7.5.1
 cassandra-driver == 3.21.0

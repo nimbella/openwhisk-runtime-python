@@ -117,6 +117,15 @@ def check(tgt_dir, module_name):
         if mod:
             with open(mod.origin, "rb") as f:
                 ast.parse(f.read().decode("utf-8"))
+            # check virtualenv
+            path_to_virtualenv = abspath('%s/virtualenv' % tgt_dir)
+            if os.path.isdir(path_to_virtualenv):
+                activate_this_file = path_to_virtualenv + '/bin/activate_this.py'
+                if not os.path.exists(activate_this_file):
+                    # check if this was packaged for windows
+                    activate_this_file = path_to_virtualenv + '/Scripts/activate_this.py'
+                if not os.path.exists(activate_this_file):
+                    sys.stderr.write("Invalid virtualenv. Zip file does not include 'activate_this.py'.\n")
         else:
             sys.stderr.write("Zip file does not include %s\n" % module_name)
     except SyntaxError as er:

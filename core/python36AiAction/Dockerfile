@@ -17,8 +17,8 @@
 
 # build go proxy from source
 FROM golang:1.15 AS builder_source
-ARG GO_PROXY_GITHUB_USER=apache
-ARG GO_PROXY_GITHUB_BRANCH=master
+ARG GO_PROXY_GITHUB_USER=nimbella-corp
+ARG GO_PROXY_GITHUB_BRANCH=dev
 RUN git clone --branch ${GO_PROXY_GITHUB_BRANCH} \
    https://github.com/${GO_PROXY_GITHUB_USER}/openwhisk-runtime-go /src ;\
    cd /src ; env GO111MODULE=on CGO_ENABLED=0 go build main/proxy.go && \
@@ -52,7 +52,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
             vim \
             && rm -rf /var/lib/apt/lists/*
 
-# PyTorch
 # persistent as it fails often
 RUN while ! pip list | grep torch ;\
     do pip install torch ; done ;\
@@ -64,10 +63,16 @@ RUN curl -L https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rclon
     && dpkg -i rclone.deb \
     && rm rclone.deb
 
+# Copy nimbella version of the sfx library
+COPY signalfx-lambda-python /opt/signalfx_lambda
+
 COPY requirements.txt requirements.txt
 RUN pip3 install --upgrade pip six wheel &&\
     pip3 install --no-cache-dir -r requirements.txt &&\
     ln -sf /usr/bin/python3 /usr/local/bin/python
+
+# install nim
+RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
 
 RUN mkdir -p /action
 WORKDIR /
@@ -84,7 +89,7 @@ ENV OW_LOG_INIT_ERROR=1
 # the launcher must wait for an ack
 ENV OW_WAIT_FOR_ACK=1
 # using the runtime name to identify the execution environment
-ENV OW_EXECUTION_ENV=openwhisk/action-python-v3.6-ai
+#ENV OW_EXECUTION_ENV=openwhisk/action-python-v3.6-ai
 # compiler script
 ENV OW_COMPILER=/bin/compile
 # use utf-8
