@@ -16,7 +16,7 @@ python-rclone == 0.0.2
 google-cloud-storage == 1.28.1
 
 # Nimbella package
-nimbella == 1.0.0
+nimbella == 2.1.1
 
 # Etc
 pymongo == 3.10.1
