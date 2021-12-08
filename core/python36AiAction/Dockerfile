@@ -72,7 +72,8 @@ RUN pip3 install --upgrade pip six wheel &&\
     ln -sf /usr/bin/python3 /usr/local/bin/python
 
 # install nim
-RUN curl https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh | bash
+ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
+RUN curl ${NIM_INSTALL_SCRIPT} | bash
 
 RUN mkdir -p /action
 WORKDIR /
