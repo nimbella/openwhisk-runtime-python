@@ -63,9 +63,6 @@ RUN curl -L https://downloads.rclone.org/rclone-current-linux-amd64.deb -o rclon
     && dpkg -i rclone.deb \
     && rm rclone.deb
 
-# Copy nimbella version of the sfx library
-COPY signalfx-lambda-python /opt/signalfx_lambda
-
 COPY requirements.txt requirements.txt
 RUN pip3 install --upgrade pip six wheel &&\
     pip3 install --no-cache-dir -r requirements.txt &&\
