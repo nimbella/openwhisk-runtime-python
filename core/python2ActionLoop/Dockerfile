@@ -67,8 +67,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools six \
         scrapy==1.5.1 \
         simplejson==3.16.0 \
         virtualenv==16.0.0 \
-        twisted==18.7.0 \
-        signalfx_lambda==0.2.1
+        twisted==18.7.0
 
 # install nim
 ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
