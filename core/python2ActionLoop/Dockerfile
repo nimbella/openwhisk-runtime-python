@@ -71,6 +71,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools six \
 
 # install nim
 ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl ${NIM_INSTALL_SCRIPT} | bash
 
 RUN mkdir -p /action
