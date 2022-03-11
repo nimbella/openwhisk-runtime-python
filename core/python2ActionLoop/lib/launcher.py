@@ -20,6 +20,7 @@ import sys, os, codecs, json, traceback, warnings
 
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+log_sentinel="XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX\n"
 
 try:
   # if the directory 'virtualenv' is extracted out of a zip file
@@ -68,6 +69,8 @@ while True:
     res = {"error": str(ex)}
   out.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
   out.write(b'\n')
+  sys.stdout.write(log_sentinel)
+  sys.stderr.write(log_sentinel)
   sys.stdout.flush()
   sys.stderr.flush()
   out.flush()

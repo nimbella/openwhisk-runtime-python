@@ -21,6 +21,8 @@ from sys import stderr
 from os import fdopen
 import sys, os, json, traceback, warnings
 
+log_sentinel="XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX\n"
+
 try:
   # if the directory 'virtualenv' is extracted out of a zip file
   path_to_virtualenv = os.path.abspath('./virtualenv')
@@ -68,6 +70,8 @@ while True:
     res = {"error": str(ex)}
   out.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
   out.write(b'\n')
+  stdout.write(log_sentinel)
+  stderr.write(log_sentinel)
   stdout.flush()
   stderr.flush()
   out.flush()
