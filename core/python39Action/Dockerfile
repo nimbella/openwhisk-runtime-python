@@ -17,27 +17,15 @@
 
 # build go proxy from source
 ARG GO_PROXY_BASE_IMAGE=golang:1.18
-FROM $GO_PROXY_BASE_IMAGE AS builder_source
+FROM $GO_PROXY_BASE_IMAGE AS builder
+
 ARG GO_PROXY_GITHUB_USER=nimbella-corp
 ARG GO_PROXY_GITHUB_BRANCH=dev
-RUN git clone --branch ${GO_PROXY_GITHUB_BRANCH} \
-  https://github.com/${GO_PROXY_GITHUB_USER}/openwhisk-runtime-go /src ;\
-  cd /src ; env GO111MODULE=on CGO_ENABLED=0 go build main/proxy.go && \
-  mv proxy /bin/proxy
+RUN git clone --branch ${GO_PROXY_GITHUB_BRANCH} https://github.com/${GO_PROXY_GITHUB_USER}/openwhisk-runtime-go /src \
+  && cd /src \
+  && env GO111MODULE=on CGO_ENABLED=0 go build -o /bin/proxy main/proxy.go
 
-# or build it from a release
-FROM $GO_PROXY_BASE_IMAGE AS builder_release
-ARG GO_PROXY_RELEASE_VERSION=1.16@1.18.0
-RUN curl -sL \
-  https://github.com/apache/openwhisk-runtime-go/archive/{$GO_PROXY_RELEASE_VERSION}.tar.gz\
-  | tar xzf -\
-  && cd openwhisk-runtime-go-*/main\
-  && GO111MODULE=on go build -o /bin/proxy
-
-FROM python:3.9-buster
-
-# select the builder to use
-ARG GO_PROXY_BUILD_FROM=release
+FROM python:3.9-slim-buster
 
 # Install common modules for python
 COPY requirements.txt requirements.txt
@@ -46,16 +34,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # install nim
 ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl ${NIM_INSTALL_SCRIPT} | bash
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl \
+  && curl ${NIM_INSTALL_SCRIPT} | bash \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /action
 WORKDIR /
-COPY --from=builder_source /bin/proxy /bin/proxy_source
-COPY --from=builder_release /bin/proxy /bin/proxy_release
-RUN mv /bin/proxy_${GO_PROXY_BUILD_FROM} /bin/proxy
-ADD bin/compile /bin/compile
-ADD lib/launcher.py /lib/launcher.py
-ADD lib/prelauncher.py /lib/prelauncher.py
+COPY bin/compile /bin/compile
+COPY lib/launcher.py /lib/launcher.py
+COPY lib/prelauncher.py /lib/prelauncher.py
 
 # log initialization errors
 ENV OW_LOG_INIT_ERROR=1
@@ -68,4 +56,5 @@ ENV OW_COMPILER=/bin/compile
 
 ENV OW_INIT_IN_ACTIONLOOP=/lib/prelauncher.py
 
+COPY --from=builder /bin/proxy /bin/proxy
 ENTRYPOINT ["/bin/proxy"]
