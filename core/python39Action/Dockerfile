@@ -55,6 +55,7 @@ COPY --from=builder_release /bin/proxy /bin/proxy_release
 RUN mv /bin/proxy_${GO_PROXY_BUILD_FROM} /bin/proxy
 ADD bin/compile /bin/compile
 ADD lib/launcher.py /lib/launcher.py
+ADD lib/prelauncher.py /lib/prelauncher.py
 
 # log initialization errors
 ENV OW_LOG_INIT_ERROR=1
@@ -64,5 +65,7 @@ ENV OW_WAIT_FOR_ACK=1
 #ENV OW_EXECUTION_ENV=openwhisk/action-python-v3.9
 # compiler script
 ENV OW_COMPILER=/bin/compile
+
+ENV OW_INIT_IN_ACTIONLOOP=/lib/prelauncher.py
 
 ENTRYPOINT ["/bin/proxy"]
