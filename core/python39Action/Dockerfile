@@ -43,10 +43,16 @@ ARG GO_PROXY_BUILD_FROM=release
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# install nim
-ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
+# install nim (to be retired once we are fully switched to using doctl)
+ARG NIM_INSTALL_SCRIPT=
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl ${NIM_INSTALL_SCRIPT} | bash
+
+# install doctl serverless (co-exist with nim temporarily)
+ARG DOCTL_DOWNLOAD
+ARG DOCTL_API_TOKEN
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -L ${DOCTL_DOWNLOAD} | tar xzf - && mv doctl /usr/local/bin/doctl && doctl auth init -t ${DOCTL_API_TOKEN} && doctl sls install
 
 RUN mkdir -p /action
 WORKDIR /
