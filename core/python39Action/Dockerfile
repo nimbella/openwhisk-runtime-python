@@ -43,10 +43,17 @@ ARG GO_PROXY_BUILD_FROM=release
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# install nim
-ARG NIM_INSTALL_SCRIPT=https://apigcp.nimbella.io/downloads/nim/nim-install-linux.sh
+# install nim (to be retired once we are fully switched to using functions-deployer)
+ARG NIM_INSTALL_SCRIPT=
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl ${NIM_INSTALL_SCRIPT} | bash
+
+# install the functions-deployer (co-exist with nim temporarily)
+ARG DEPLOYER_DOWNLOAD
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -L ${DEPLOYER_DOWNLOAD} | tar xzf - \
+  && rm -fr /usr/local/lib/dosls && mv dosls /usr/local/lib \
+  && rm -f /usr/local/bin/dosls && ln -s /usr/local/lib/dosls/bootstrap /usr/local/bin/dosls
 
 RUN mkdir -p /action
 WORKDIR /
