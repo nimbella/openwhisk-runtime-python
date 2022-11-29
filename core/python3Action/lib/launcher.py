@@ -19,7 +19,7 @@ from sys import stdin
 from sys import stdout
 from sys import stderr
 from os import fdopen
-import sys, os, json, traceback, warnings
+import sys, os, json, traceback, time
 
 log_sentinel="XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX\n"
 
@@ -45,6 +45,26 @@ except Exception:
 # now import the action as process input/output
 from main__ import main as main
 
+class Context:
+  def __init__(self, env):
+    self.function_name = env["__OW_ACTION_NAME"]
+    self.function_version = env["__OW_ACTION_VERSION"]
+    self.activation_id = env["__OW_ACTIVATION_ID"]
+    self.deadline = int(os.environ["__OW_DEADLINE"])
+
+  def get_remaining_time_in_millis(self):
+    epoch_now_in_ms = int(time.time() * 1000)
+    delta_ms = self.deadline - epoch_now_in_ms
+    return delta_ms if delta_ms > 0 else 0
+
+def fun(payload, env):
+  # Compatibility: Supports "old" context-less functions.
+  if main.__code__.co_argcount == 1:
+    return main(payload)
+
+  # Lambda-like "new-style" function.
+  return main(payload, Context(env))
+
 out = fdopen(3, "wb")
 if os.getenv("__OW_WAIT_FOR_ACK", "") != "":
     out.write(json.dumps({"ok": True}, ensure_ascii=False).encode('utf-8'))
@@ -64,7 +84,7 @@ while True:
       env["__OW_%s" % key.upper()]= args[key]
   res = {}
   try:
-    res = main(payload)
+    res = fun(payload, env)
   except Exception as ex:
     print(traceback.format_exc(), file=stderr)
     res = {"error": str(ex)}
