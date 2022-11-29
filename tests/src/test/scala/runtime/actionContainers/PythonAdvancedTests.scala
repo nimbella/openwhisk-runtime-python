@@ -16,7 +16,8 @@
  */
 package runtime.actionContainers
 
-import spray.json.{JsObject, JsString}
+import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 trait PythonAdvancedTests {
   this: PythonBasicTests =>
@@ -90,5 +91,62 @@ trait PythonAdvancedTests {
         o should include("xyz")
         e shouldBe empty
     })
+  }
+
+  Map(
+    "prelaunched" -> Map.empty[String, String],
+    "non-prelaunched" -> Map("OW_INIT_IN_ACTIONLOOP" -> ""),
+  ).foreach { case (name, env) =>
+    it should s"support a function with a lambda-like signature and transform HTTP events $name" in {
+      val (out, err) = withActionContainer(env) { c =>
+        val code =
+          """
+            |def main(event, context):
+            |   return {
+            |      "event": event,
+            |      "context": {
+            |         "remaining_time": context.get_remaining_time_in_millis(),
+            |         "activation_id": context.activation_id,
+            |         "function_name": context.function_name,
+            |         "function_version": context.function_version
+            |      }
+            |   }
+          """.stripMargin
+
+        val (initCode, _) = c.init(initPayload(code))
+        initCode should be(200)
+
+        val (runCode, out) = c.run(runPayload(
+          JsObject(
+            "__ow_headers" -> JsObject("headerKey" -> "headerValue".toJson),
+            "__ow_method" -> "get".toJson,
+            "__ow_path" -> "/foo/bar".toJson,
+            "__ow_query" -> "foo=bar&foo=baz&test=test".toJson
+          ), 
+          Some(JsObject(
+            "deadline" -> "0".toJson,
+            "activation_id" -> "testid".toJson,
+            "action_name" -> "testfunction".toJson,
+            "action_version" -> "0.0.1".toJson
+          ))
+        ))
+        runCode should be(200)
+
+        out shouldBe Some(JsObject(
+          "event" -> JsObject(
+            "headers" -> JsObject("headerKey" -> "headerValue".toJson),
+            "httpMethod" -> "GET".toJson,
+            "path" -> "/foo/bar".toJson,
+            "multiValueQueryStringParameters" -> JsObject("foo" -> JsArray("bar".toJson, "baz".toJson), "test" -> JsArray("test".toJson)),
+            "queryStringParameters" -> JsObject("foo" -> "bar".toJson, "test" -> "test".toJson),
+          ),
+          "context" -> JsObject(
+            "remaining_time" -> 0.toJson, // This being 0 proofs that the function exists and is callable at least.
+            "activation_id" -> "testid".toJson,
+            "function_name" -> "testfunction".toJson,
+            "function_version" -> "0.0.1".toJson
+          )))
+      }
+    }
   }
 }
