@@ -106,6 +106,7 @@ trait PythonAdvancedTests {
             |   return {
             |      "remaining_time": context.get_remaining_time_in_millis(),
             |      "activation_id": context.activation_id,
+            |      "request_id": context.request_id,
             |      "function_name": context.function_name,
             |      "function_version": context.function_version
             |   }
@@ -118,7 +119,8 @@ trait PythonAdvancedTests {
           JsObject(),
           Some(JsObject(
             "deadline" -> Instant.now.plusSeconds(10).toEpochMilli.toString.toJson,
-            "activation_id" -> "testid".toJson,
+            "activation_id" -> "testaid".toJson,
+            "transaction_id" -> "testtid".toJson,
             "action_name" -> "testfunction".toJson,
             "action_version" -> "0.0.1".toJson
           ))
@@ -129,7 +131,8 @@ trait PythonAdvancedTests {
         remainingTime should be > 9500 // We give the test 500ms of slack to invoke the function to avoid flakes.
         out shouldBe Some(JsObject(
           "remaining_time" -> remainingTime.toJson,
-          "activation_id" -> "testid".toJson,
+          "activation_id" -> "testaid".toJson,
+          "request_id" -> "testtid".toJson,
           "function_name" -> "testfunction".toJson,
           "function_version" -> "0.0.1".toJson
         ))

@@ -102,6 +102,7 @@ class Context:
     self.function_name = env["__OW_ACTION_NAME"]
     self.function_version = env["__OW_ACTION_VERSION"]
     self.activation_id = env["__OW_ACTIVATION_ID"]
+    self.request_id = env["__OW_TRANSACTION_ID"]
     self.deadline = int(os.environ["__OW_DEADLINE"])
 
   def get_remaining_time_in_millis(self):
