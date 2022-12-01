@@ -18,6 +18,7 @@ package runtime.actionContainers
 
 import spray.json._
 import spray.json.DefaultJsonProtocol._
+import java.time.Instant
 
 trait PythonAdvancedTests {
   this: PythonBasicTests =>
@@ -116,7 +117,7 @@ trait PythonAdvancedTests {
         val (runCode, out) = c.run(runPayload(
           JsObject(),
           Some(JsObject(
-            "deadline" -> "0".toJson,
+            "deadline" -> Instant.now.plusSeconds(10).toEpochMilli.toString.toJson,
             "activation_id" -> "testid".toJson,
             "action_name" -> "testfunction".toJson,
             "action_version" -> "0.0.1".toJson
@@ -124,8 +125,10 @@ trait PythonAdvancedTests {
         ))
         runCode should be(200)
 
+        val remainingTime = out.get.fields("remaining_time").convertTo[Int]
+        remainingTime should be > 9500 // We give the test 500ms of slack to invoke the function to avoid flakes.
         out shouldBe Some(JsObject(
-          "remaining_time" -> 0.toJson, // This being 0 proofs that the function exists and is callable at least.
+          "remaining_time" -> remainingTime.toJson,
           "activation_id" -> "testid".toJson,
           "function_name" -> "testfunction".toJson,
           "function_version" -> "0.0.1".toJson
