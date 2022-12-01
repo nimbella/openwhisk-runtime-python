@@ -99,7 +99,7 @@ trait PythonAdvancedTests {
     "non-prelaunched" -> Map("OW_INIT_IN_ACTIONLOOP" -> ""),
   ).foreach { case (name, env) =>
     it should s"support a function with a lambda-like signature $name" in {
-      val (out, err) = withActionContainer(env) { c =>
+      val (out, err) = withActionContainer(env + ("__OW_API_HOST" -> "testhost")) { c =>
         val code =
           """
             |def main(event, context):
@@ -108,7 +108,10 @@ trait PythonAdvancedTests {
             |      "activation_id": context.activation_id,
             |      "request_id": context.request_id,
             |      "function_name": context.function_name,
-            |      "function_version": context.function_version
+            |      "function_version": context.function_version,
+            |      "api_host": context.api_host,
+            |      "api_key": context.api_key,
+            |      "namespace": context.namespace
             |   }
           """.stripMargin
 
@@ -122,7 +125,9 @@ trait PythonAdvancedTests {
             "activation_id" -> "testaid".toJson,
             "transaction_id" -> "testtid".toJson,
             "action_name" -> "testfunction".toJson,
-            "action_version" -> "0.0.1".toJson
+            "action_version" -> "0.0.1".toJson,
+            "namespace" -> "testnamespace".toJson,
+            "auth_key" -> "testkey".toJson
           ))
         ))
         runCode should be(200)
@@ -134,7 +139,10 @@ trait PythonAdvancedTests {
           "activation_id" -> "testaid".toJson,
           "request_id" -> "testtid".toJson,
           "function_name" -> "testfunction".toJson,
-          "function_version" -> "0.0.1".toJson
+          "function_version" -> "0.0.1".toJson,
+          "api_host" -> "testhost".toJson,
+          "api_key" -> "testkey".toJson,
+          "namespace" -> "testnamespace".toJson
         ))
       }
     }

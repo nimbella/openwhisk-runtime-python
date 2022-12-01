@@ -103,7 +103,10 @@ class Context:
     self.function_version = env["__OW_ACTION_VERSION"]
     self.activation_id = env["__OW_ACTIVATION_ID"]
     self.request_id = env["__OW_TRANSACTION_ID"]
-    self.deadline = int(os.environ["__OW_DEADLINE"])
+    self.deadline = int(env["__OW_DEADLINE"])
+    self.api_host = env["__OW_API_HOST"]
+    self.api_key = env.get("__OW_AUTH_KEY", "")
+    self.namespace = env["__OW_NAMESPACE"]
 
   def get_remaining_time_in_millis(self):
     epoch_now_in_ms = int(time.time() * 1000)
