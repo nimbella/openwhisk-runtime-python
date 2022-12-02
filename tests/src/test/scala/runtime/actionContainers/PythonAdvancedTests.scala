@@ -16,7 +16,9 @@
  */
 package runtime.actionContainers
 
-import spray.json.{JsObject, JsString}
+import spray.json._
+import spray.json.DefaultJsonProtocol._
+import java.time.Instant
 
 trait PythonAdvancedTests {
   this: PythonBasicTests =>
@@ -90,5 +92,59 @@ trait PythonAdvancedTests {
         o should include("xyz")
         e shouldBe empty
     })
+  }
+
+  Map(
+    "prelaunched" -> Map.empty[String, String],
+    "non-prelaunched" -> Map("OW_INIT_IN_ACTIONLOOP" -> ""),
+  ).foreach { case (name, env) =>
+    it should s"support a function with a lambda-like signature $name" in {
+      val (out, err) = withActionContainer(env + ("__OW_API_HOST" -> "testhost")) { c =>
+        val code =
+          """
+            |def main(event, context):
+            |   return {
+            |      "remaining_time": context.get_remaining_time_in_millis(),
+            |      "activation_id": context.activation_id,
+            |      "request_id": context.request_id,
+            |      "function_name": context.function_name,
+            |      "function_version": context.function_version,
+            |      "api_host": context.api_host,
+            |      "api_key": context.api_key,
+            |      "namespace": context.namespace
+            |   }
+          """.stripMargin
+
+        val (initCode, _) = c.init(initPayload(code))
+        initCode should be(200)
+
+        val (runCode, out) = c.run(runPayload(
+          JsObject(),
+          Some(JsObject(
+            "deadline" -> Instant.now.plusSeconds(10).toEpochMilli.toString.toJson,
+            "activation_id" -> "testaid".toJson,
+            "transaction_id" -> "testtid".toJson,
+            "action_name" -> "testfunction".toJson,
+            "action_version" -> "0.0.1".toJson,
+            "namespace" -> "testnamespace".toJson,
+            "auth_key" -> "testkey".toJson
+          ))
+        ))
+        runCode should be(200)
+
+        val remainingTime = out.get.fields("remaining_time").convertTo[Int]
+        remainingTime should be > 9500 // We give the test 500ms of slack to invoke the function to avoid flakes.
+        out shouldBe Some(JsObject(
+          "remaining_time" -> remainingTime.toJson,
+          "activation_id" -> "testaid".toJson,
+          "request_id" -> "testtid".toJson,
+          "function_name" -> "testfunction".toJson,
+          "function_version" -> "0.0.1".toJson,
+          "api_host" -> "testhost".toJson,
+          "api_key" -> "testkey".toJson,
+          "namespace" -> "testnamespace".toJson
+        ))
+      }
+    }
   }
 }

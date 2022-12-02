@@ -21,7 +21,7 @@ from sys import stdin
 from sys import stdout
 from sys import stderr
 from os import fdopen
-import sys, os, json, traceback, base64, io, zipfile
+import sys, os, json, traceback, base64, io, zipfile, time
 
 log_sentinel="XXX_THE_END_OF_A_WHISK_ACTIVATION_XXX\n"
 def write_sentinels():
@@ -97,6 +97,30 @@ try:
 except Exception as ex:
   cannot_start("Invalid action: %s\n" % str(ex))
 
+class Context:
+  def __init__(self, env):
+    self.function_name = env["__OW_ACTION_NAME"]
+    self.function_version = env["__OW_ACTION_VERSION"]
+    self.activation_id = env["__OW_ACTIVATION_ID"]
+    self.request_id = env["__OW_TRANSACTION_ID"]
+    self.deadline = int(env["__OW_DEADLINE"])
+    self.api_host = env["__OW_API_HOST"]
+    self.api_key = env.get("__OW_AUTH_KEY", "")
+    self.namespace = env["__OW_NAMESPACE"]
+
+  def get_remaining_time_in_millis(self):
+    epoch_now_in_ms = int(time.time() * 1000)
+    delta_ms = self.deadline - epoch_now_in_ms
+    return delta_ms if delta_ms > 0 else 0
+
+def fun(payload, env):
+  # Compatibility: Supports "old" context-less functions.
+  if main.__code__.co_argcount == 1:
+    return main(payload)
+
+  # Lambda-like "new-style" function.
+  return main(payload, Context(env))
+
 # Acknowledge the initialization.
 write_result({"ok": True})
 
@@ -113,7 +137,7 @@ while True:
       os.environ["__OW_%s" % key.upper()]= args[key]
   res = {}
   try:
-    res = main(payload)
+    res = fun(payload, os.environ)
   except Exception as ex:
     print(traceback.format_exc(), file=stderr)
     res = {"error": str(ex)}
