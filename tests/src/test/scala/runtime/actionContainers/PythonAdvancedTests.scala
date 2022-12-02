@@ -127,7 +127,7 @@ trait PythonAdvancedTests {
             "action_name" -> "testfunction".toJson,
             "action_version" -> "0.0.1".toJson,
             "namespace" -> "testnamespace".toJson,
-            "auth_key" -> "testkey".toJson
+            "api_key" -> "testkey".toJson
           ))
         ))
         runCode should be(200)
