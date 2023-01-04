@@ -114,12 +114,17 @@ class Context:
     return delta_ms if delta_ms > 0 else 0
 
 def fun(payload, env):
+  # Compatibility: Supporting "old" context-less functions that have no params
+  # to match other languages.
+  if main.__code__.co_argcount == 0:
+    return main() or {}
+
   # Compatibility: Supports "old" context-less functions.
   if main.__code__.co_argcount == 1:
-    return main(payload)
+    return main(payload) or {}
 
   # Lambda-like "new-style" function.
-  return main(payload, Context(env))
+  return main(payload, Context(env)) or {}
 
 # Acknowledge the initialization.
 write_result({"ok": True})
