@@ -60,7 +60,7 @@ trait PythonAdvancedTests {
       // action loop detects those errors at init time
       val (initCode, initRes) = c.init(initPayload(code))
       initCode should be(502)
-      initRes.get.fields.get("error").get.toString() should include("Cannot start action")
+      initRes.get.fields.get("error").get.toString() should include("Cannot start function")
     }
     checkStreams(out, err, {
       case (o, e) =>

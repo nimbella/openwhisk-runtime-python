@@ -38,7 +38,7 @@ def write_result(res):
 
 def cannot_start(msg):
   stderr.write(msg)
-  write_result({"error": "Cannot start action. Check logs for details."})
+  write_result({"error": "Cannot start function. Check logs for details."})
   write_sentinels()
   sys.exit(1)
 
@@ -95,7 +95,7 @@ try:
   sys.path.append(os.getcwd())
   main = getattr(__import__("main__", fromlist=[init["main"]]), init["main"])
 except Exception as ex:
-  cannot_start("Invalid action: %s\n" % str(ex))
+  cannot_start("Invalid function: %s\n" % str(ex))
 
 class Context:
   def __init__(self, env):
