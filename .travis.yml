@@ -39,13 +39,13 @@ script:
   - "./tools/travis/build.sh && ./tools/travis/test.sh"
 deploy:
   - provider: script
-    script: "./tools/travis/publish.sh nimbella 3 ${TRAVIS_TAG} && ./tools/travis/publish.sh nimbella 3-ai ${TRAVIS_TAG} && ./tools/travis/publish.sh nimbella 39 ${TRAVIS_TAG}"
+    script: "./tools/travis/publish.sh nimbella 3 ${TRAVIS_TAG} && ./tools/travis/publish.sh nimbella 3-ai ${TRAVIS_TAG} && ./tools/travis/publish.sh nimbella 39 ${TRAVIS_TAG} **&& ./tools/travis/publish.sh nimbella 311 ${TRAVIS_TAG}**"
     on:
       tags: true
       all_branches: true
       repo: nimbella-corp/openwhisk-runtime-python
   - provider: script
-    script: "./tools/travis/publish.sh nimbella 3 nightly && ./tools/travis/publish.sh nimbella 3-ai nightly && ./tools/travis/publish.sh nimbella 39 nightly"
+    script: "./tools/travis/publish.sh nimbella 3 nightly && ./tools/travis/publish.sh nimbella 3-ai nightly && ./tools/travis/publish.sh nimbella 39 nightly **&& ./tools/travis/publish.sh nimbella 311 nightly**"
     on:
       branch: dev
       repo: nimbella-corp/openwhisk-runtime-python
