@@ -15,16 +15,26 @@
  * limitations under the License.
  */
 
+
+
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath "cz.alenkacz:gradle-scalafmt:${gradle.scalafmt.version}"
+        // Dependencies for the build script itself go here
     }
 }
 
+plugins {
+    id "cz.alenkacz.gradle.scalafmt" version "1.16.2" apply false
+}
+
 subprojects {
-    apply plugin: 'scalafmt'
-    scalafmt.configFilePath = gradle.scalafmt.config
+    // Only apply if the project is a Scala project or has the property
+    if (project.name.contains("scala") || project.hasProperty('scalafmt')) {
+        apply plugin: 'cz.alenkacz.gradle.scalafmt'
+        scalafmt.configFilePath = gradle.scalafmt.config
+    }
 }
