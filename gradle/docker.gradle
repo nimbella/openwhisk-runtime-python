@@ -54,8 +54,16 @@ if(project.hasProperty('dockerHost')) {
 }
 
 if(project.hasProperty('dockerBuildArgs')) {
-    dockerBuildArgs.split(' ').each { arg  ->
-        dockerBuildArg += ['--build-arg', arg]
+    // Split the string into a list of individual arguments
+    def argsList = project.dockerBuildArgs.split(' ')
+    argsList.each { arg ->
+        if (arg.startsWith('--')) {
+            // It's a flag (like --no-cache), add it directly
+            dockerBuildArg += [arg]
+        } else {
+            // It's a variable (like KEY=VAL), add the prefix
+            dockerBuildArg += ['--build-arg', arg]
+        }
     }
 }
 

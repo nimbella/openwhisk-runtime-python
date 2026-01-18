@@ -17,14 +17,17 @@
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath "cz.alenkacz:gradle-scalafmt:${gradle.scalafmt.version}"
+        classpath "cz.alenkacz.gradle.scalafmt:cz.alenkacz.gradle.scalafmt.gradle.plugin:${gradle.scalafmt.version}"
     }
 }
 
 subprojects {
-    apply plugin: 'scalafmt'
-    scalafmt.configFilePath = gradle.scalafmt.config
+    plugins.withId('scala') {
+        apply plugin: 'cz.alenkacz.gradle.scalafmt'
+        scalafmt.configFilePath = gradle.scalafmt.config
+    }
 }
