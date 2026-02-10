@@ -22,6 +22,8 @@ include 'core:python3Action'
 include 'core:python36AiAction'
 include 'core:python39Action'
 include 'core:python311Action'
+include 'core:python312Action'
+include 'core:python313Action'
 
 rootProject.name = 'runtime-python'
 
